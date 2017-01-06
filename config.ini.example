@@ -1,0 +1,52 @@
+[request]
+
+
+[server]
+host = "0.0.0.0"
+port = 9501
+max_request = 2000
+worker_num = 4
+task_worker_num = 8
+daemonize = 0
+webroot = 'http://127.0.0.1:9501'
+process_rename = 1
+keepalive = 1
+;gzip_open = 1
+user = www-data
+expire_open = 1
+
+[session]
+cookie_life = 1800
+session_life = 1800
+
+[access]
+deny_dir = "libs,class,templates"
+static_dir = "static/,"
+static_ext = "js,jpg,gif,png,css,html"
+dynamic_ext = "php"
+post_maxsize = 2000000
+
+
+[redis]
+host = '127.0.0.1'
+port = '6379'
+
+
+[mysql]
+host = '127.0.0.1'
+prot = 3306
+user = 'user'
+password = 'password'
+database = 'database'
+
+[mail]
+protocol = "smtp"
+smtp_host = "mail.host.com"
+smtp_port = 25
+smtp_user = "user"
+smtp_from = "user@mailhost.com"
+from_name = "mail_name"
+smtp_pass = "mail_pass"
+
+[warning]
+mail_list = "user@mailhost.com"
