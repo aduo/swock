@@ -10,6 +10,8 @@ class Control {
     private static $_server;    //swoole server进程
     private static $_config;
     private static $_instance;  //实例
+    private static $_request;
+    private static $_response;
     static $star_time;
     static $options;
     static $optionKit;
@@ -86,12 +88,12 @@ class Control {
         } else {
             usage:
             $printer = new ConsoleOptionPrinter();
-//            $printer->render("php {$argv[0]} start|stop|reload");
+            //            $printer->render("php {$argv[0]} start|stop|reload");
             echo "==================================================\r\n";
             echo "     php {$argv[0]} start|stop|reload             \r\n";
             echo "==================================================\r\n";
             echo $printer->render($kit);
-//            $kit->specs->printOptions("php {$argv[0]} start|stop|reload");
+            //            $kit->specs->printOptions("php {$argv[0]} start|stop|reload");
             exit;
         }
         self::$options = $opt;
@@ -114,7 +116,7 @@ class Control {
      * @return string
      */
     static function killProcessByName($name, $signo = 9) {
-//        $cmd = 'ps -eaf |grep "' . $name . '" | grep -v "grep"| awk "{print $2}"|xargs kill -' . $signo;
+        //        $cmd = 'ps -eaf |grep "' . $name . '" | grep -v "grep"| awk "{print $2}"|xargs kill -' . $signo;
         $cmd = "ps -eaf |grep '" . $name . "' | grep -v 'grep'| awk '{print $2}'|xargs kill -" . $signo;
         return exec($cmd);
     }
@@ -249,7 +251,45 @@ class Control {
 
     public static function useMemory() {
         return memory_get_usage();
-//        print_r(memory_get_usage().PHP_EOL);
+        //        print_r(memory_get_usage().PHP_EOL);
+    }
+
+    /**
+     * 设置当前的request对象
+     * @param \swoole_http_request $request
+     */
+    public static function setCurrentRequest(\swoole_http_request $request) {
+        self::$_request = $request;
+    }
+
+    /**
+     * 返回当前的request对象.
+     * 该返回不可靠. 在异步任务中拿取到的可能是新请求request对象
+     * @return null|swoole_http_request
+     * @author zhaoduo
+     * @date 2017-01-10 19:07:03
+     */
+    public static function getCurrentRequest() {
+        return empty(self::$_request) ? null : self::$_request;
+    }
+
+    /**
+     * 设置当前的response对象
+     * @param \swoole_http_response $response
+     */
+    public static function setCurrentResponse(\swoole_http_response $response) {
+        self::$_response = $response;
+    }
+
+    /**
+     * 返回当前的response对象.
+     * 该返回不可靠. 在异步任务中拿取到的可能是新请求response对象
+     * @return null|swoole_http_response
+     * @author zhaoduo
+     * @date 2017-01-10 19:09:44
+     */
+    public static function getCurrentResponse() {
+        return empty(self::$_response) ? null : self::$_response;
     }
 
 

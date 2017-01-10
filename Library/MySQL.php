@@ -72,7 +72,7 @@ class MySQL {
 
     public function waitQuery($sql, callable $callback) {
         $this->wait_queue->push([
-            'sql' => $sql,
+            'sql'      => $sql,
             'callback' => $callback
         ]);
     }
@@ -113,6 +113,7 @@ class MySQL {
 
     /**
      * 从等待队列中拿取sql执行
+     *
      * @param $db
      */
     public function doWaitQuery($db) {
@@ -154,7 +155,7 @@ class MySQL {
      */
     public function freeConnection(\swoole_mysql $db) {
         //检查队列中是否存在等待执行的sql
-        if(count($this->wait_queue > 0)) {
+        if(count($this->wait_queue) > 0) {
             $this->doWaitQuery($db);
         } else {
             array_push($this->idle_pool, $db);

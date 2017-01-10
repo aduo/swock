@@ -136,6 +136,8 @@ class Route {
      * @author zhaoduo
      */
     public function requestHandle(\swoole_http_request $request, \swoole_http_response $response) {
+        Control::setCurrentRequest($request);
+        Control::setCurrentResponse($response);
         ob_start();
         $this->request = $request;
         $this->response = $response;
@@ -163,7 +165,7 @@ class Route {
         if(isset($route_info['callback']) && !empty($route_info['callback'])) {
             try{
                 $resp = call_user_func($route_info['callback']);
-//                var_dump($resp);
+                //                var_dump($resp);
             } catch(\Exception $e) {
                 $this->page500($e);
             }
@@ -221,9 +223,13 @@ class Route {
                 $this->page500($e);
             }
         }
-        $ob_buffer = ob_get_clean();
-        $end_str = $ob_buffer . $resp;
-        $response->end($end_str ? $end_str : " ");
+        if(is_object($resp) && is_a($resp, AsyncResponse::class)) { //如果是存在异步任务. 则返回AsyncResponse对象. 不会马上执行response->end()
+            $resp->setResponse($response);
+        } else {
+            $ob_buffer = ob_get_clean();
+            $end_str = $ob_buffer . $resp;
+            $response->end($end_str ? $end_str : " ");
+        }
     }
 
     /**
@@ -268,11 +274,11 @@ class Route {
         $class_key = md5($class);
         if(!isset($this->{$class_key})) {
             if(!class_exists($class)) {
-//                return $this->pushError($frame->fd);
+                //                return $this->pushError($frame->fd);
             }
             $this->{$class_key} = new $class($this->server);
         }
-//
+        //
         $function = $route_info['function'];
         if(!method_exists($this->{$class_key}, $function)) {
             return $this->pushError($frame->fd);
