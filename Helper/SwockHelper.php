@@ -182,9 +182,18 @@ if(!function_exists('task')) {
      */
     function task(\Swock\Task\BaseTask $task) {
         $server = \Swock\Control::getServer();
-        return $server->task($task, $task->getDstWorkerId(), function(\swoole_server $server, $task_id, $data) use($task){
-            $task->afterHandle($server, $task_id, $data);
-        });
+        if($task->getDelayTime() > 0) { //设置延时执行
+            $server->after($task->getDelayTime() * 1000, function() use($server, $task) {
+                $server->task($task, $task->getDstWorkerId(), function(\swoole_server $server, $task_id, $data) use($task){
+                    $task->afterHandle($server, $task_id, $data);
+                });
+            });
+            return true;
+        } else {
+            return $server->task($task, $task->getDstWorkerId(), function(\swoole_server $server, $task_id, $data) use($task){
+                $task->afterHandle($server, $task_id, $data);
+            });
+        }
     }
 }
 
